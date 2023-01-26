@@ -1,0 +1,38 @@
+  # hexmain.asm
+  # Written 2015-09-04 by F Lundevall
+  # Copyright abandonded - this file is in the public domain.
+
+	.text
+main:
+	li	$a0,17	# change this to test different values
+
+	jal	hexasc		# call hexasc
+	nop			# delay slot filler (just in case)	
+
+	move	$a0,$v0		# copy return value to argument register
+
+	li	$v0,11		# syscall with v0 = 11 will print out
+	syscall			# one byte from a0 to the Run I/O window
+	
+stop:	j	stop		# stop after one run
+	nop			# delay slot filler (just in case)
+
+  # You can write your own code for hexasc here
+  #
+
+hexasc:
+      	andi  $a1 $a0 0x0f #and to get only bits on 4 lsb
+      	addi  $v0 $0 0x30
+     	addi  $t0 $0 0x9 
+
+	#slt $t1 $a1 $t0
+	#beq $t1 1 L1
+	bge $t0 $a1 done #Check if inouted number (a0) is bigger than 9 (10,11...) and branches if that holds
+	nop
+      	addi  $v0 $v0 0x7 # Adds 7 to v0 because want to jump over ascii values 3A-40 
+
+done:
+      	add   $v0 $a1 $v0
+      	jr    $ra
+      	nop
+
