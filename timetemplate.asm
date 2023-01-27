@@ -24,7 +24,7 @@ main:
 	syscall
 	nop
 	# wait a little
-	li	$a0,2
+	li	$a0,1000
 	jal	delay
 	nop
 	# call tick
@@ -98,6 +98,26 @@ tiend:	sw	$t0,0($a0)	# save updated result
  	
  	
  delay:
+ 	
+ 	and $t0, $t0, $0	# i
+ 	
+ 	mul $t1, $a0, 200       # constant
+ 	
+while_loop: 
+ 	blez $a0, jump		# <= 0
+ 	
+ 	addi $a0, $a0, -1
+ 	
+ for_loop:
+ 	bge, $t0, $t1, while_loop
+ 	
+ 	addi $t0, $t0, 1	# i + 1
+ 	
+ 	j for_loop
+ 	
+ jump: 
+ 
+ 	
   	jr $ra
   	nop
   	
@@ -127,7 +147,7 @@ tiend:	sw	$t0,0($a0)	# save updated result
  	sb $v0, 0x00($s6)		# Store byte in first index
  	
  	srl $a0, $s2, 8			# shift again
- 	
+ 				
  	jal hexasc
  	
  	sb $v0, 0x01($s6)		#store byte in second index
