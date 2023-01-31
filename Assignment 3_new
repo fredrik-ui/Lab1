@@ -24,7 +24,7 @@ main:
 	syscall
 	nop
 	# wait a little
-	li	$a0,1000
+	li	$a0,2
 	jal	delay
 	nop
 	# call tick
@@ -86,7 +86,7 @@ tiend:	sw	$t0,0($a0)	# save updated result
  	addi $a0, $a0, 0x30  # add to get the Asci 
  	
  	bge $t1, $t0 number    # compare to see if it's > 9
- 	nop 
+ 	
  	addi $a0, $a0, 0x7
  	
  number: 
@@ -94,32 +94,10 @@ tiend:	sw	$t0,0($a0)	# save updated result
  	move $v0, $a0  		
  	
  	jr $ra
- 	nop
+ 	
  	
  	
  delay:
- 	
- 	and $t0, $t0, $0	# i
- 	
- 	mul $t1, $a0, 600	
- 	
-while_loop: 
- 	blez $a0, jump	# <= 0
- 	nop
- 	addi $a0, $a0, -1
- 	
- for_loop:
- 	bge, $t0, $t1, while_loop
- 	nop
- 	
- 	addi $t0, $t0, 1	# i + 1
- 	
- 	j for_loop
- 	nop
- 	
- jump: 
- 
- 	
   	jr $ra
   	nop
   	
@@ -131,44 +109,56 @@ while_loop:
  	
  	PUSH $ra
  	
- 	move $s1, $a0			# Move address 	
+ 	move $s6, $a0			# Move address 
  	
  	
- 	andi $t1, $a1, 0xf000 
- 	srl $a0, $t1, 12		#shift s1 right and store in a0
+ 
+ 	andi $s1, $a1, 0xf000 		# Take 4 nibble and store it to 4 varible
+ 	andi $s2, $a1, 0x0f00
+ 	andi $s3, $a1, 0x00f0
+ 	andi $s4, $a1, 0x000f		
+ 	
+ 	
+ 	srl $a0, $s1, 12		#shift s1 right and store in a0
+ 	
+ 	
  	jal hexasc			#call hexasc
- 	nop
- 	sb $v0, 0x00($s1)
  	
- 	andi $t1, $a1, 0x0f00		# Store byte in first index
- 	srl $a0, $t1, 8			# shift again			
+ 	sb $v0, 0x00($s6)		# Store byte in first index
+ 	
+ 	srl $a0, $s2, 8			# shift again
+ 	
  	jal hexasc
- 	nop
- 	sb $v0, 0x01($s1)		#store byte in second index
  	
- 	li $t1, 0x3a			#make and store a ":"
- 	sb $t1, 0x02($s1)
+ 	sb $v0, 0x01($s6)		#store byte in second index
  	
- 	andi $t1, $a1, 0x00f0
- 	srl $a0, $t1, 4
+ 	li $s7, 0x3a			#make and store a ":"
+ 	
+ 	sb $s7, 0x02($s6)
+ 	
+ 	
+ 	srl $a0, $s3, 4
+ 	
  	jal hexasc
- 	nop
- 	sb $v0, 0x03($s1)
  	
- 	andi $t1, $a1, 0x000f
- 	move $a0, $t1
+ 	sb $v0, 0x03($s6)
+ 	
+ 	move $a0, $s4
+ 	
  	jal hexasc
- 	nop
- 	sb $v0, 0x04($s1)	
  	
- 	li $t1, 0x00			#make and store null
- 	sb $t1, 0x05($s1)
  	
- 	and $s1, $s1, $0
+ 	sb $v0, 0x04($s6)	
+ 	
+ 	li $s7, 0x00			#make and store null
+ 	
+ 	sb $s7, 0x05($s6)
  	
  	
  	POP $ra
  	
  	jr $ra
- 	nop
+ 	
+ 	
+ 	
  	
