@@ -24,7 +24,7 @@ main:
 	syscall
 	nop
 	# wait a little
-	li	$a0,2
+	li	$a0,1000
 	jal	delay
 	nop
 	# call tick
@@ -74,28 +74,101 @@ tiend:	sw	$t0,0($a0)	# save updated result
 
   # you can write your code for subroutine "hexasc" below this line
   #
-hexasc:
-      	andi  $a1 $a0 0x0f #and to get only bits on 4 lsb
-      	addi  $v0 $0 0x30
-     	addi  $t0 $0 0x9 
-
-	#slt $t1 $a1 $t0
-	#beq $t1 1 L1
-	bge $t0 $a1 done #Check if inouted number (a0) is bigger than 9 (10,11...) and branches if that holds
-	nop
-      	addi  $v0 $v0 0x7 # Adds 7 to v0 because want to jump over ascii values 3A-40 
-
-done:
-      	add   $v0 $a1 $v0
-      	jr    $ra
-      	nop
-
-delay:
-	jr $ra
-	nop
-
-time2string: 
-	PUSH $ra 
-	
-	
-	
+   hexasc:
+ 
+ 
+ 	andi $a0, $a0, 0xf   #only take the 4 LSB
+ 	
+ 	move $t0, $a0	     # compare variable	
+ 	
+ 	li $t1, 0x9   	     #store 9 to compare
+ 	
+ 	addi $a0, $a0, 0x30  # add to get the Asci 
+ 	
+ 	bge $t1, $t0 number    # compare to see if it's > 9
+ 	nop 
+ 	addi $a0, $a0, 0x7
+ 	
+ number: 
+ 
+ 	move $v0, $a0  		
+ 	
+ 	jr $ra
+ 	nop
+ 	
+ 	
+ delay:
+ 	
+ 	and $t0, $t0, $0	# i
+ 	
+ 	mul $t1, $a0, 600	
+ 	
+while_loop: 
+ 	blez $a0, jump	# <= 0
+ 	nop
+ 	addi $a0, $a0, -1
+ 	
+ for_loop:
+ 	bge, $t0, $t1, while_loop
+ 	nop
+ 	
+ 	addi $t0, $t0, 1	# i + 1
+ 	
+ 	j for_loop
+ 	nop
+ 	
+ jump: 
+ 
+ 	
+  	jr $ra
+  	nop
+  	
+  	
+  	
+  	
+ time2string:
+ 
+ 	
+ 	PUSH $ra
+ 	
+ 	move $s1, $a0			# Move address 	
+ 	
+ 	
+ 	andi $t1, $a1, 0xf000 
+ 	srl $a0, $t1, 12		#shift s1 right and store in a0
+ 	jal hexasc			#call hexasc
+ 	nop
+ 	sb $v0, 0x00($s1)
+ 	
+ 	andi $t1, $a1, 0x0f00		# Store byte in first index
+ 	srl $a0, $t1, 8			# shift again			
+ 	jal hexasc
+ 	nop
+ 	sb $v0, 0x01($s1)		#store byte in second index
+ 	
+ 	li $t1, 0x3a			#make and store a ":"
+ 	sb $t1, 0x02($s1)
+ 	
+ 	andi $t1, $a1, 0x00f0
+ 	srl $a0, $t1, 4
+ 	jal hexasc
+ 	nop
+ 	sb $v0, 0x03($s1)
+ 	
+ 	andi $t1, $a1, 0x000f
+ 	move $a0, $t1
+ 	jal hexasc
+ 	nop
+ 	sb $v0, 0x04($s1)	
+ 	
+ 	li $t1, 0x00			#make and store null
+ 	sb $t1, 0x05($s1)
+ 	
+ 	and $s1, $s1, $0
+ 	
+ 	
+ 	POP $ra
+ 	
+ 	jr $ra
+ 	nop
+ 	
